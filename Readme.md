@@ -1,4 +1,4 @@
-\## README
+\## Vegana Automation Testing Screenshots
 
 
 
@@ -50,9 +50,9 @@
 
 
 
-\### Trang chủ
+\### Trang Chủ
 
-!\[Trang chủ](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/trang%20chu.png?raw=true)
+!\[Trang Chủ](https://github.com/KhaiHASO/Vegana-Automation-Testing/blob/main/readme%20vegana/trang%20chu.png?raw=true)
 
 
 
