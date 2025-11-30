@@ -97,7 +97,7 @@ jobs:
       
       - name: 📊 Upload Test Reports
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-reports
           path: |
@@ -108,7 +108,7 @@ jobs:
       
       - name: 📝 Upload Application Logs
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: app-logs
           path: app.log
