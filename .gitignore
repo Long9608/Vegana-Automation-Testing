@@ -44,3 +44,8 @@ logs/
 *.bak
 *.swp
 *~
+
+# Jenkins
+jenkins/jenkins_home/
+app.pid
+app.log
