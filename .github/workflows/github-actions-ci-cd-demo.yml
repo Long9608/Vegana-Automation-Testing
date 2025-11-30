@@ -68,12 +68,11 @@ jobs:
           if [ -f vegana.sql ]; then
             mysql -h 127.0.0.1 -uroot -p123456 vegana_store < vegana.sql
           fi
-          mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=false" > app.log 2>&1 &
+          mvn spring-boot:run -Dspring-boot.run.jvmArguments="-Dspring.devtools.restart.enabled=false -Dhibernate.hbm2ddl.auto=validate" > app.log 2>&1 &
           sleep 40
           curl -f http://localhost:8080 || exit 1
         env:
           MYSQL_PWD: 123456
-          SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       
       - name: Run Tests
         continue-on-error: true

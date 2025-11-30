@@ -55,7 +55,15 @@ public class PersistenceJPAConfig {
 
 	Properties additionalProperties() {
 		Properties properties = new Properties();
-		properties.setProperty("hibernate.hbm2ddl.auto", "update");
+		// Allow override via system property or environment variable for CI/CD
+		String ddlAuto = System.getProperty("hibernate.hbm2ddl.auto");
+		if (ddlAuto == null || ddlAuto.isEmpty()) {
+			ddlAuto = System.getenv("HIBERNATE_HBM2DDL_AUTO");
+		}
+		if (ddlAuto == null || ddlAuto.isEmpty()) {
+			ddlAuto = "update"; // default
+		}
+		properties.setProperty("hibernate.hbm2ddl.auto", ddlAuto);
 		properties.setProperty("hibernate.show_sql", "true");
 		properties.setProperty("hibernate.dialect", "org.hibernate.dialect.MySQL8Dialect");
 		return properties;
