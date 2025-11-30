@@ -54,8 +54,14 @@ public class BaseTest {
         switch (browser) {
             case "chrome":
                 ChromeOptions chromeOptions = new ChromeOptions();
+                // Browser sẽ tự động mở và hiển thị (không headless)
                 chromeOptions.addArguments("--start-maximized");
                 chromeOptions.addArguments("--disable-notifications");
+                chromeOptions.addArguments("--disable-infobars");
+                chromeOptions.addArguments("--disable-dev-shm-usage");
+                chromeOptions.addArguments("--no-sandbox");
+                // Đảm bảo browser hiển thị (không headless)
+                chromeOptions.setHeadless(false);
                 // Selenium 4 tự động quản lý driver thông qua Selenium Manager
                 driver = new ChromeDriver(chromeOptions);
                 break;
@@ -63,6 +69,8 @@ public class BaseTest {
             case "firefox":
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
                 firefoxOptions.addArguments("--start-maximized");
+                // Đảm bảo browser hiển thị (không headless)
+                firefoxOptions.setHeadless(false);
                 // Selenium 4 tự động quản lý driver thông qua Selenium Manager
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
@@ -71,6 +79,11 @@ public class BaseTest {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--start-maximized");
                 options.addArguments("--disable-notifications");
+                options.addArguments("--disable-infobars");
+                options.addArguments("--disable-dev-shm-usage");
+                options.addArguments("--no-sandbox");
+                // Đảm bảo browser hiển thị (không headless)
+                options.setHeadless(false);
                 // Selenium 4 tự động quản lý driver thông qua Selenium Manager
                 driver = new ChromeDriver(options);
                 break;
@@ -78,6 +91,10 @@ public class BaseTest {
             default:
                 ChromeOptions defaultOptions = new ChromeOptions();
                 defaultOptions.addArguments("--start-maximized");
+                defaultOptions.addArguments("--disable-notifications");
+                defaultOptions.addArguments("--disable-infobars");
+                // Đảm bảo browser hiển thị (không headless)
+                defaultOptions.setHeadless(false);
                 // Selenium 4 tự động quản lý driver thông qua Selenium Manager
                 driver = new ChromeDriver(defaultOptions);
         }
