@@ -1,21 +1,119 @@
-name: Trigger Jenkins Pipeline
+pipeline {
+    agent any
 
-on:
-  workflow_dispatch:
-  push:
-    branches: [ main ]
+    environment {
+        DOCKER_USER = credentials('dockerhub-user')      // Docker Hub username
+        DOCKER_PASS = credentials('dockerhub-pass')      // Docker Hub password/token
+        MYSQL_ROOT_PASSWORD = "123456"
+        MYSQL_DATABASE = "vegana_store"
+    }
 
-jobs:
-  trigger_jenkins:
-    runs-on: ubuntu-latest
+    stages {
 
-    steps:
-      - name: Trigger Jenkins Job
-        run: |
-          echo "Triggering Jenkins pipeline..."
+        // =======================================
+        // 🔹 STAGE 1 — Checkout code
+        // =======================================
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
 
-          curl -X POST \
-            "${{ secrets.JENKINS_URL }}/job/Vegana-CI-CD/build" \
-            --user "${{ secrets.JENKINS_USER }}:${{ secrets.JENKINS_API_TOKEN }}"
+        // =======================================
+        // 🔹 STAGE 2 — Start MySQL (Docker)
+        // =======================================
+        stage('Start MySQL Service') {
+            steps {
+                sh '''
+                docker rm -f mysql-vegana || true
+                docker run -d --name mysql-vegana \
+                    -e MYSQL_ROOT_PASSWORD=123456 \
+                    -e MYSQL_DATABASE=vegana_store \
+                    -p 3306:3306 \
+                    mysql:8.0
 
-          echo "Done."
+                echo "⏳ Waiting for MySQL..."
+                for i in {1..30}; do
+                    docker exec mysql-vegana mysqladmin ping -uroot -p123456 --silent && break
+                    sleep 2
+                done
+                '''
+            }
+        }
+
+        // =======================================
+        // 🔹 STAGE 3 — Build Spring Boot (skip tests)
+        // =======================================
+        stage('Build Application') {
+            steps {
+                sh 'mvn -DskipTests clean package'
+            }
+        }
+
+        // =======================================
+        // 🔹 STAGE 4 — Start Spring Boot
+        // =======================================
+        stage('Run Spring Boot') {
+            steps {
+                sh '''
+                echo "🚀 Starting Spring Boot..."
+                nohup mvn spring-boot:run > app.log 2>&1 &
+                sleep 40
+                curl -f http://localhost:9090 || exit 1
+                '''
+            }
+        }
+
+        // =======================================
+        // 🔹 STAGE 5 — Run Selenium Automation Tests
+        // =======================================
+        stage('Run Automation Tests') {
+            steps {
+                sh '''
+                mkdir -p test-output/reports test-output/screenshots test-output/logs
+                mvn test -DsuiteXmlFile=src/test/resources/testng.xml || true
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'test-output/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'target/surefire-reports/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'app.log', allowEmptyArchive: true
+                }
+            }
+        }
+
+        // =======================================
+        // 🔹 STAGE 6 — Docker Build + Push
+        // =======================================
+        stage('Docker Build & Push') {
+            steps {
+                sh '''
+                echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                docker build -t $DOCKER_USER/vegana-shop:latest .
+                docker push $DOCKER_USER/vegana-shop:latest
+                '''
+            }
+        }
+
+        // =======================================
+        // 🔹 STAGE 7 — (Optional) Auto Deploy
+        // =======================================
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker rm -f vegana || true
+                docker run -d --name vegana -p 9090:9090 $DOCKER_USER/vegana-shop:latest
+                '''
+            }
+        }
+    }
+
+    post {
+        always {
+            sh "pkill -f 'spring-boot:run' || true"
+            sh "docker rm -f mysql-vegana || true"
+        }
+    }
+}
