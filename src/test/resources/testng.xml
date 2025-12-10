@@ -24,5 +24,23 @@
             <class name="com.java.automation.tests.admin.AdminFunctionsTest"/>
         </classes>
     </test>
+    
+    <test name="Admin CRUD Tests">
+        <classes>
+            <class name="com.java.automation.tests.admin.AdminCRUDTest"/>
+        </classes>
+    </test>
+    
+    <test name="Shop Tests">
+        <classes>
+            <class name="com.java.automation.tests.user.ShopTest"/>
+        </classes>
+    </test>
+    
+    <test name="Shopping Cart Tests">
+        <classes>
+            <class name="com.java.automation.tests.user.ShoppingCartTest"/>
+        </classes>
+    </test>
 </suite>
 
